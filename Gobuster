@@ -1,0 +1,140 @@
+# Directory Enumeration Report Using Gobuster
+
+## Objective
+
+The objective of this exercise was to perform directory enumeration against the target web application using Gobuster to identify accessible directories, files, and hidden resources.
+
+## Tools Used
+
+* **Operating System:** Kali Linux
+* **Enumeration Tool:** Gobuster v3.8.2
+* **Wordlist:** `/usr/share/seclists/Discovery/Web-Content/common.txt`
+
+---
+
+# Test 1: High-Concurrency Scan
+
+## Command Executed
+
+```bash
+gobuster dir \
+-u http://lab.sigosec.com \
+-w /usr/share/seclists/Discovery/Web-Content/common.txt \
+-t 150 \
+-o result.txt
+```
+
+Figure 1. Gobuster directory enumeration using 150 concurrent threads.
+
+<p align="center"> <img src="https://files.catbox.moe/0f0unf.png" alt="Figure 1. Gobuster directory enumeration output" width="900"> </p>
+
+## Scan Configuration
+
+| Parameter   | Value                    |
+| ----------- | ------------------------ |
+| Target URL  | `http://lab.sigosec.com` |
+| HTTP Method | GET                      |
+| Threads     | 150                      |
+| Wordlist    | `common.txt`             |
+| Timeout     | 10 seconds               |
+| Output File | `result.txt`             |
+
+## Findings
+
+The scan completed successfully after testing all **4,750** entries contained in the selected wordlist.
+
+The following paths were discovered:
+
+| Path                                 | HTTP Status | Observation        |
+| ------------------------------------ | ----------- | ------------------ |
+| `/.git/logs/`                        | 308         | Permanent Redirect |
+| `/cgi-bin/`                          | 308         | Permanent Redirect |
+| `/render?url=https://www.google.com` | 308         | Permanent Redirect |
+| `/render/https://www.google.com`     | 308         | Permanent Redirect |
+
+Several timeout errors were encountered during the scan. Some examples include:
+
+* `Browser`
+* `bin`
+* `cachemgr.cgi`
+
+These timeout messages indicate that the target server did not respond within the configured timeout period for some requests.
+
+---
+
+# Test 2: Default-Concurrency Scan
+
+## Command Executed
+
+```bash
+gobuster dir \
+-u http://lab.sigosec.com \
+-w /usr/share/seclists/Discovery/Web-Content/common.txt \
+-o result.txt
+```
+
+**Figure 2. Gobuster directory enumeration using the default thread count (10).**
+
+*Insert screenshot here.*
+
+## Scan Configuration
+
+| Parameter   | Value                    |
+| ----------- | ------------------------ |
+| Target URL  | `http://lab.sigosec.com` |
+| HTTP Method | GET                      |
+| Threads     | 10 (default)             |
+| Wordlist    | `common.txt`             |
+| Timeout     | 10 seconds               |
+| Output File | `result.txt`             |
+
+## Findings
+
+A second scan was performed using Gobuster's default thread count to determine whether lowering the level of concurrency would improve the scan results.
+
+The scan again processed all **4,750** entries in the wordlist and identified the same paths as the first scan.
+
+| Path                                 | HTTP Status | Observation        |
+| ------------------------------------ | ----------- | ------------------ |
+| `/.git/logs/`                        | 308         | Permanent Redirect |
+| `/cgi-bin/`                          | 308         | Permanent Redirect |
+| `/render?url=https://www.google.com` | 308         | Permanent Redirect |
+| `/render/https://www.google.com`     | 308         | Permanent Redirect |
+
+Although the thread count was reduced from 150 to 10, timeout errors continued to occur throughout the scan. Examples include:
+
+* `.bash_history`
+* `.env`
+* `.git/HEAD`
+* `.htpasswd`
+* `checkoutanon`
+* `search`
+* `server-status`
+* `test`
+* `~guest`
+* `~webmaster`
+
+Despite these timeout messages, the scan completed successfully.
+
+---
+
+# Observations
+
+The following observations were made during the enumeration process:
+
+1. Both scans completed successfully despite intermittent timeout errors.
+2. The same four paths were identified in both scans, indicating consistent enumeration results.
+3. All discovered paths returned **HTTP Status Code 308 (Permanent Redirect)**.
+4. No directories or files returning **HTTP 200 (OK), 301 (Moved Permanently), 302 (Found), or 403 (Forbidden)** were identified using the selected wordlist.
+5. Reducing the number of concurrent threads from 150 to the default value of 10 did not significantly affect the scan results.
+6. The repeated timeout errors may indicate temporary network latency, server-side response delays, or request throttling during the enumeration process.
+
+---
+
+# Conclusion
+
+Directory enumeration was successfully performed against the target web application using Gobuster and the SecLists `common.txt` wordlist.
+
+Two scans were conducted using different thread configurations. Both scans produced identical results, identifying four paths that returned **HTTP Status Code 308 (Permanent Redirect)**. Although numerous timeout errors occurred during the enumeration process, they did not prevent Gobuster from completing the scan.
+
+Based on the selected wordlist and scan configuration, no additional accessible directories or files were identified. Further assessment could include the use of larger wordlists, alternative enumeration techniques, or additional testing methods where permitted by the assessment scope and authorization.
